@@ -31,7 +31,7 @@
 (struct posn (x y) #:transparent)
 ;; Скорость
 (define SPEED 0.1)
-(define-values ( PAUSE?) #f)
+(define ( PAUSE?) #f)
 ;;Границы
 (define SIZE 30)
 
