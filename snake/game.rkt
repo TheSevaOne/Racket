@@ -84,12 +84,8 @@
      
   
   )
-   
-
-
-;; Есть или идти (шаг)
-(define (next w)
-  
+   ;; Есть или идти (шаг)
+  (define (next w)
   (define snake (area-snake w))
   (define apples  (area-apple w))
   (define apple-to-eat (can-eat snake apples))
@@ -140,37 +136,23 @@
                      (fresh-apple)
                      (fresh-apple)))
          ]
-
-
         [ (key=? d "2")
           (area (snake  "down" (list (posn 1 1)))
-                 (list (fresh-apple)
-                     ))]
-
-
-        [ (key=? d "p") (pause w)
-                     ]
+                 (list (fresh-apple)))]
+        [ (key=? d "p") (pause w) ]
          [else w]
          ))
 
 
   
 (define (rendersnake w)
-
 (text (string-append 
          "Съел:" 
          (number->string (length(OUT-ONE(snake-segs (area-snake w))))))
         END
-        "PURPLE")
+        "PURPLE"))
 
-
-
-
-)
-
- 
-
-
+ ;;Рендер геймовера
 (define (render-end w )
   
   (overlay (overlay/offset (render-over)
@@ -178,13 +160,7 @@
                            (rendersnake w))
            (render-area w)
            
-           )
-   
-  )
-
-
-
-
+           ))
 
 ; (define (tofile )
 ; 
@@ -205,15 +181,6 @@
 ;        )
 
        
-
-
-
-
-
-
-
-
-
 (define (tofile  file  score)
 
 (write-to-file  score file 
