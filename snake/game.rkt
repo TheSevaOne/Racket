@@ -29,7 +29,7 @@
 ;; Поле expire - это натуральное число, представляющее число
 ;;
 (struct posn (x y) #:transparent)
-;; Отклик
+;; Скорость
 (define SPEED 0.1)
 (define-values ( PAUSE?) #f)
 ;;Границы
