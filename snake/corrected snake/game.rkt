@@ -1,17 +1,17 @@
 #lang racket
 
 ;;;;Аверков Всеволод
-    ;; Пауза на P
-    ;; Запись очков в файл (есть проблема с повторной записью 
+;; Пауза на P
+;; Запись очков в файл (есть проблема с повторной записью 
 ; (define (tofile  file  score)
 ;   (write-to-file  score file
 ;     #:exists  'update
 ;    #:mode 'text
 ;      )) )
 
-    ;; Смена режимов игры (кнопки 1 и 2)
-    ;; запуск (game)
-    ;;Сделана телепортация яблок по таймеру
+;; Смена режимов игры (кнопки 1 и 2)
+;; запуск (game)
+;;Сделана телепортация яблок по таймеру
   
 
 ;;ЛИТЕРАТУРА
@@ -20,7 +20,7 @@
 ;;https://htdp.org/2003-09-26/Book/curriculum-Z-H-1.html
 (require picturing-programs)
 (require racket/file)
- (require htdp/gui)
+(require htdp/gui)
 (require htdp/dir)
 (require racket/sandbox)
 (struct area (snake apple) #:transparent)
@@ -54,8 +54,8 @@
 (define END 50)
 (define MESSAGE(text "Для смены режима нажмите 1 или 2. Пауза на 'p'. Выход 'q'." 15 "yellow"))
 (define MAIN (place-image/align MESSAGE  20 5 "left" "top"
-(place-image/align (rectangle 450 25 "solid" "blue") 0 0 "left" "top"
-                                 (empty-scene WIDTH-PX HEIGHT-PX "black"))))
+                                (place-image/align (rectangle 450 25 "solid" "blue") 0 0 "left" "top"
+                                                   (empty-scene WIDTH-PX HEIGHT-PX "black"))))
 
 (define APPLE-IMG (scale 0.020 (bitmap "44.png")))
 (define SEG-IMG  (square 10 "solid" "yellow"))
@@ -69,33 +69,33 @@
 ;;;BIGBANG
 (define (s)
   (big-bang (area (snake  "down" (list (posn 1 4)))
-                 (list (fresh-apple)
-                     (fresh-apple)
-                     (fresh-apple)
-                     (fresh-apple)))
-            (on-tick next SPEED)
-            (name "Exam Project") 
-            (on-key direct-snake)
-            (to-draw render-area)
-            (stop-when hit? render-end)
-            (close-on-stop 5)))
+                  (list (fresh-apple)
+                        (fresh-apple)
+                        (fresh-apple)
+                        (fresh-apple)))
+    (on-tick next SPEED)
+    (name "Exam Project") 
+    (on-key direct-snake)
+    (to-draw render-area)
+    (stop-when hit? render-end)
+    (close-on-stop 5)))
 
 
 
 (define (game)
-    (tofile "Score.txt"(length(drop-right(snake-segs(area-snake(s))))))
-       (game))
+  (tofile "Score.txt"(length(drop-right(snake-segs(area-snake(s))))))
+  (game))
 
 
 ;; Есть или идти (шаг)
-  (define (next w)
+(define (next w)
   (define snake (area-snake w))
   (define apples  (area-apple w))
   (define apple-to-eat (can-eat snake apples))
   (if PAUSE? w 
-  (if apple-to-eat
-      (area (grow snake) (age-apple (eat apples apple-to-eat)));;area(snake apple score +1)
-      (area (slither snake) (age-apple apples)))))
+      (if apple-to-eat
+          (area (grow snake) (age-apple (eat apples apple-to-eat)));;area(snake apple score +1)
+          (area (slither snake) (age-apple apples)))))
 
 ;;обработка нажатий
 (define (direct-snake w ke)
@@ -125,35 +125,35 @@
 ;; Пауза и режимы ,Выход 
 (define (gamemode d w)
   ( cond
-        [(key=? d "1")
-                    (area (snake  "down" (list (posn  1 4)))
-                 (list (fresh-apple)
-                     (fresh-apple)
-                     (fresh-apple)
-                     (fresh-apple)))]
-        [ (key=? d "2")
-          (area (snake  "down" (list (posn  1 4)))
-                 (list (fresh-apple)))]
-        [(key=? d "p")
+     [(key=? d "1")
+      (area (snake  "down" (list (posn  1 4)))
+            (list (fresh-apple)
+                  (fresh-apple)
+                  (fresh-apple)
+                  (fresh-apple)))]
+     [ (key=? d "2")
+       (area (snake  "down" (list (posn  1 4)))
+             (list (fresh-apple)))]
+     [(key=? d "p")
           
-          (pause w) ]
+      (pause w) ]
         
-        [(key=? d "q") (exit)] 
-         [else w]
-         )
+     [(key=? d "q") (exit)] 
+     [else w]
+     )
   )
 
 (define (rendersnake w)
-(text (string-append 
+  (text (string-append 
          "Съел:" 
          (number->string (length(drop-right(snake-segs (area-snake w))))))
         END
         "PURPLE"))
 
- ;;Рендер геймовера
+;;Рендер геймовера
 (define (render-end w )
   (overlay (overlay/offset (render-over)
-                          0 END
+                           0 END
                            (rendersnake w))
            (render-area w)))
 
@@ -178,8 +178,8 @@
        
 (define (tofile  file  score)
 
-(write-to-file  score file   #:exists  'update
-                             #:mode 'text))
+  (write-to-file  score file   #:exists  'update
+                  #:mode 'text))
 
 
 
@@ -202,7 +202,7 @@
 ;; > (eat (list (apple (posn 5 5) 5)) (apple(posn 5 5) 5))
 ;;(list (apple (posn 14 12) 150))
 (define (eat apples apple-to-eat)
- ;  (set! score (+ 1 score))
+  ;  (set! score (+ 1 score))
    
   (cons (fresh-apple) (remove apple-to-eat apples)))
 
@@ -210,7 +210,7 @@
 ;; > (close? (posn 1 2) (apple (posn 1 2) 4))
 ;; #t
 (define (close? s g)
-(posn=? s (apple-loc g)))
+  (posn=? s (apple-loc g)))
 
 ;; Наращивание хвоста
 
@@ -221,15 +221,15 @@
 ;(snake "right" (list (posn 3 1) (posn 2 1) (posn 1 1)))
 ;> 
 (define (grow sn)
-(snake (snake-dir sn) (cons (next-head sn) (snake-segs sn))))
+  (snake (snake-dir sn) (cons (next-head sn) (snake-segs sn))))
 
 ;;;;;/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ;; ДВИЖЕНИЕ 
 ;; на один вперед
 
 (define (slither sn)
-(snake (snake-dir sn)
-(cons (next-head sn) (drop-right (snake-segs sn)))))
+  (snake (snake-dir sn)
+         (cons (next-head sn) (drop-right (snake-segs sn)))))
 
 ;; Вычисляет следующую позицию головы змеи.
 (define (next-head sn)
@@ -312,7 +312,7 @@
       (string=? x "down") 
       (string=? x "left") 
       (string=? x "right")
-   ))
+      ))
       
 ;; 
 ;; Измените направление если не напротив текущей позиции)
@@ -320,12 +320,12 @@
 (define (world-change-dir w d)
   (define the-snake (area-snake w))
   (cond [(and (opposite-dir? (snake-dir the-snake) d) 
-         ;;  состоит из головы и хотя бы одного сегмента
+              ;;  состоит из головы и хотя бы одного сегмента
               (cons? (rest (snake-segs the-snake))))
          (stop-with w)]
         [else 
          (area (snake-change-dir the-snake d) 
-              (area-apple  w))]))
+               (area-apple  w))]))
 
 ;; 
 ;; 
@@ -376,9 +376,9 @@
 ;;              (img-list+scene empty APPLE-IMG MAIN))
 (define (img-list+scene posns img scene)
   (cond[(empty? posns) scene]
-        [else (img+scene (first posns)
-                         img 
-                         (img-list+scene (rest posns) img scene))]))
+       [else (img+scene (first posns)
+                        img 
+                        (img-list+scene (rest posns) img scene))]))
 
 ;; 
 ;; 
@@ -387,7 +387,7 @@
 ;; (place-image APPLE-IMG 32 32 MAIN)
 
 (define (img+scene posn img scene)
-   (place-image img 
+  (place-image img 
                (* (posn-x posn) path)
                (* (posn-y posn) path)
                scene))
