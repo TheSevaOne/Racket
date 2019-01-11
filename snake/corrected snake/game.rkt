@@ -268,22 +268,19 @@
         [else
          (cons (first apple) (renew (rest apple)))]))
 
-;;  
-;; 
+
 (define (exp g)
   (cond [(empty? g)
          '()]
         [else (cons (countdown (first g))
                     (exp (rest g)))]))
 
-;; 
 ;; срок годности 
 ;; > (done? (apple 1 2)
 ;; #t
 (define (done? g)
   (zero? (apple-expire g)))
 
-;; 
 ;; ументшает  на 1 счетсик
 ;; > (countdown (apple (posn 1 2) 2))
 ;; (apple(posn 1 2) 1)
@@ -292,9 +289,7 @@
 
 ;; 
 ;; Рандом для яблок 
-;; 
-;; ,
-;;  
+ 
 (define (fresh-apple)
   (apple (posn (add1 (random (sub1 SIZE)))
                (add1 (random   2 (sub1 SIZE))))EXPIRATION-TIME))
@@ -309,10 +304,8 @@
       (string=? x "left") 
       (string=? x "right")
       ))
-      
-;; 
+
 ;; Измените направление если не напротив текущей позиции)
-;;
 (define (world-change-dir w d)
   (define the-snake (area-snake w))
   (cond [(and (opposite-dir? (snake-dir the-snake) d) 
@@ -333,8 +326,7 @@
         [(string=? d1 "down")  (string=? d2 "up")]
         [(string=? d1 "left")  (string=? d2 "right")]
         [(string=? d1 "right") (string=? d2 "left")]))
-
-;; 
+ 
 ;; РИСУЮ ЗМЕЮ от положения
 ;; > 
 (define (snake+scene snake scene)
@@ -354,7 +346,7 @@
 
 ;; рисую яблоки
 (define (apple-list+scene apple scene)
-  ;;
+
   ;;ПОЗИЦИИ ЯБЛОК
   ;; > (get-posns-from-apple (list (apple (posn 2 2) 1) (apple (posn 3 3) 1))
   ;; (list (posn 2 2) (posn 3 3))
