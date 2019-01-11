@@ -1,6 +1,5 @@
 #lang racket
 
-
 ;;;;Аверков Всеволод
     ;; Пауза на P
     ;; Запись очков в файл (есть проблема с повторной записью 
@@ -13,16 +12,15 @@
     ;; Смена режимов игры (кнопки 1 и 2)
     ;; запуск (game)
     ;;Сделана телепортация яблок по таймеру
-    ;; Проделано взаимодействие с REPL
+  
 
 ;;ЛИТЕРАТУРА
 
 ;;http://picturingprograms.com/
 ;;https://htdp.org/2003-09-26/Book/curriculum-Z-H-1.html
-(require 2htdp/image)
 (require picturing-programs)
 (require racket/file)
- 
+ (require htdp/gui)
 (require htdp/dir)
 (require racket/sandbox)
 (struct area (snake apple) #:transparent)
@@ -37,7 +35,7 @@
 (struct posn (x y) #:transparent)
 ;; Скорость
 (define SPEED 0.1)
-(define ( PAUSE?) #f)
+(define-values ( PAUSE?) #f)
 ;;Границы
 (define SIZE 30)
 
@@ -52,60 +50,57 @@
 (define HEIGHT-PX (* path 30))
 
 ;; Визуальная часть
-(define MAIN(empty-scene WIDTH-PX HEIGHT-PX "black"))
+;;ШРИФТ
+(define END 50)
+(define HELP-TEXT(text "Для смены режима нажмите 1 или 2. Пауза на 'p'. Выход 'q'." 15 "yellow"))
+(define MAIN (place-image/align HELP-TEXT  20 5 "left" "top"
+(place-image/align (rectangle 450 25 "solid" "blue") 0 0 "left" "top"
+                                 (empty-scene WIDTH-PX HEIGHT-PX "black"))))
+
 (define APPLE-IMG (scale 0.020 (bitmap "44.png")))
 (define SEG-IMG  (square 10 "solid" "yellow"))
 (define HEAD-IMG (square 10 "solid" "red"))
-
-(define HEAD-LEFT-IMG
-  HEAD-IMG)
+(define HEAD-LEFT-IMG HEAD-IMG)
 (define HEAD-DOWN-IMG (rotate 90 HEAD-LEFT-IMG))
 (define HEAD-RIGHT-IMG (flip-horizontal HEAD-LEFT-IMG))
 (define HEAD-UP-IMG (flip-vertical HEAD-DOWN-IMG))
-;;ШРИФТ
-(define END 50)
-
-
-
-
 
 
 ;;;BIGBANG
 (define (s)
-  (big-bang (area (snake  "down" (list (posn 1 1)))
-                 
+  (big-bang (area (snake  "down" (list (posn 1 4)))
                  (list (fresh-apple)
                      (fresh-apple)
                      (fresh-apple)
                      (fresh-apple)))
             (on-tick next SPEED)
             (name "Exam Project") 
-            (on-key direct-snake
-                              )
-            (to-draw render-area )
+            (on-key direct-snake)
+            (to-draw render-area)
             (stop-when hit? render-end)
-            (close-on-stop  5)
-    
-                )
-     
-  
-  )
-   ;; Есть или идти (шаг)
+            (close-on-stop 5)))
+
+
+
+(define (game)
+    (tofile "Score.txt"(length(drop-right(snake-segs(area-snake(s))))))
+       (game))
+
+
+;; Есть или идти (шаг)
   (define (next w)
   (define snake (area-snake w))
   (define apples  (area-apple w))
   (define apple-to-eat (can-eat snake apples))
-  (if PAUSE?
-      w
+  (if PAUSE? w 
   (if apple-to-eat
       (area (grow snake) (age-apple (eat apples apple-to-eat)));;area(snake apple score +1)
-      (area (slither snake) (age-apple apples)   ))))
+      (area (slither snake) (age-apple apples)))))
 
 ;;обработка нажатий
 (define (direct-snake w ke)
   (cond [(dir? ke) (world-change-dir w ke)]
-       [( gamemode ke w)  ]
-       
+        [( gamemode ke w)]
         [else w]))
 
 
@@ -118,55 +113,49 @@
 ;; ПРОВЕРКА НА СТОЛКНОВЕНИК
 (define (hit? w)
   (define snake (area-snake w))
-  (or (self-colliding? snake) (wall-colliding? snake)
-      )
-
-)
+  (or (self-colliding? snake) (wall-colliding? snake)))
 
 ;; КОНЕЦ ИГРЫ
-(define (render-over  )
-  (text "GAME OVER"  END  "RED")
-   
-   )
+(define (render-over)
+  (text "GAME OVER"  END  "RED"))
 
+(define (pause w )
+  (set! PAUSE? (not PAUSE? )) w )
 
-(define (pause w)
-  (set! PAUSE? (not PAUSE?)) w)
-;; Пауза и режимы 
+;; Пауза и режимы ,Выход 
 (define (gamemode d w)
-  ( cond[(key=? d "1")
- 
-         (area (snake  "down" (list (posn 1 1)))
+  ( cond
+        [(key=? d "1")
+                    (area (snake  "down" (list (posn  1 4)))
                  (list (fresh-apple)
                      (fresh-apple)
                      (fresh-apple)
-                     (fresh-apple)))
-         ]
+                     (fresh-apple)))]
         [ (key=? d "2")
-          (area (snake  "down" (list (posn 1 1)))
+          (area (snake  "down" (list (posn  1 4)))
                  (list (fresh-apple)))]
-        [ (key=? d "p") (pause w) ]
+        [(key=? d "p")
+          
+          (pause w) ]
+        
+        [(key=? d "q") (exit)] 
          [else w]
-         ))
+         )
+  )
 
-
-  
 (define (rendersnake w)
 (text (string-append 
          "Съел:" 
-         (number->string (length(OUT-ONE(snake-segs (area-snake w))))))
+         (number->string (length(drop-right(snake-segs (area-snake w))))))
         END
         "PURPLE"))
 
  ;;Рендер геймовера
 (define (render-end w )
-  
   (overlay (overlay/offset (render-over)
                           0 END
                            (rendersnake w))
-           (render-area w)
-           
-           ))
+           (render-area w)))
 
 ; (define (tofile )
 ; 
@@ -189,41 +178,10 @@
        
 (define (tofile  file  score)
 
-(write-to-file  score file 
-                             #:exists  'update
-                             #:mode 'text
-                        )
+(write-to-file  score file   #:exists  'update
+                             #:mode 'text))
 
-)
 
-(define game
-  (lambda ()
-    (printf "~%Это Змейка~%")
-    (printf "Работу выполнил Аверков В.A. ")
-    (printf " 22207 ")
-    (printf "Программная инжерения ")
-    (printf "~%Для Старта нажмите 1 ")
-    (if (equal? 1 (read))
-        (begin
-        (tofile    "Score.txt" (length(OUT-ONE(snake-segs (area-snake (s) ))))   ) 
-      ;; (o "Score.txt" (length(OUT-ONE(snake-segs (area-snake (s) )))))
-          (restart))
-
-    (printf "До свидания"))))
-
-(define restart
-    (lambda ()
-    (printf "Еще раз?~%")
-      (printf "Для перезапуска нажмите 1 , для выхода любую кнопку~%")
-     (if (equal? 1 (read))
-        (begin
-          (tofile   "Score.txt"  (length(OUT-ONE(snake-segs (area-snake (s) ))))   ) 
-          (restart ))
-        (printf "До свидания")
-        
-        )))
-  
-;; 
 
 ;; -----------------------------------------------------------------------------
 ;; ЕДА РОСТ
@@ -235,8 +193,8 @@
   (cond [(empty? apple) #f]
         [else (if (close? (snake-head snake) (first apple))
                   (first apple)
-                  (can-eat snake (rest apple)
-                           )  )   ]))
+                  (can-eat snake (rest apple)))]))
+
 (define  (sum  y)
   (+ 1 y))
 ;; 
@@ -248,12 +206,11 @@
    
   (cons (fresh-apple) (remove apple-to-eat apples)))
 
-;; 
 ;; Проверка на яблоко
-;; > (close? (posn 1 2) (goo (posn 1 2) 4))
+;; > (close? (posn 1 2) (apple (posn 1 2) 4))
 ;; #t
 (define (close? s g)
-  (posn=? s (apple-loc g)))
+(posn=? s (apple-loc g)))
 
 ;; Наращивание хвоста
 
@@ -263,17 +220,16 @@
 ;> (grow (snake "right" `(,(posn 2 1) ,(posn 1 1))))
 ;(snake "right" (list (posn 3 1) (posn 2 1) (posn 1 1)))
 ;> 
-
 (define (grow sn)
-  (snake (snake-dir sn) (cons (next-head sn) (snake-segs sn))))
+(snake (snake-dir sn) (cons (next-head sn) (snake-segs sn))))
 
 ;;;;;/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ;; ДВИЖЕНИЕ 
 ;; на один вперед
 
 (define (slither sn)
-  (snake (snake-dir sn)
-         (cons (next-head sn) (OUT-ONE (snake-segs sn)))))
+(snake (snake-dir sn)
+(cons (next-head sn) (drop-right (snake-segs sn)))))
 
 ;; Вычисляет следующую позицию головы змеи.
 (define (next-head sn)
@@ -293,13 +249,13 @@
 
 
 ;;Возвращает список, который не содержит последний элемент данного списка.
-;; > (OUT-ONE '(1 2 3 4))
+;; > (dropright '(1 2 3 4))
 ;; '(1 2 3)
-(define (OUT-ONE segs)
+(define (drop-right segs)
   (cond [(empty? (rest segs))
          '()]
         [else (cons (first segs) 
-                    (OUT-ONE (rest segs)))]))
+                    (drop-right (rest segs)))]))
 
 
 ;; 
@@ -345,13 +301,9 @@
 ;;  
 (define (fresh-apple)
   (apple (posn (add1 (random (sub1 SIZE)))
-             (add1 (random (sub1 SIZE))))
-       EXPIRATION-TIME))
+               (add1 (random   2 (sub1 SIZE))))EXPIRATION-TIME))
 
 
-
-
-;; 
 ;; тип напрадения 
 ;; > (dir? "up")
 ;; #t
@@ -400,7 +352,10 @@
                    [(string=? "right" dir) HEAD-RIGHT-IMG])
              snake-body-scene))
 
-;; 
+
+
+
+
 ;; рисую яблоки
 (define (apple-list+scene apple scene)
   ;;
@@ -413,14 +368,14 @@
           [else (cons (apple-loc (first apple))
                       (get-posns-from-apple (rest apple)))]))
   (img-list+scene (get-posns-from-apple apple) APPLE-IMG scene))
-
+;;(posn-y(apple-loc(first(list (apple (posn 2 2) 1) (apple (posn 3 3) 1)))))
 ;; 
 ;; Рисует изображение для каждой позиции в списке
 ;; > (img-list+scene (list (posn 1 1)) APPLE-IMG MAIN)
 ;; (place-image APPLE-IMG 8 8
 ;;              (img-list+scene empty APPLE-IMG MAIN))
 (define (img-list+scene posns img scene)
-  (cond [(empty? posns) scene]
+  (cond[(empty? posns) scene]
         [else (img+scene (first posns)
                          img 
                          (img-list+scene (rest posns) img scene))]))
@@ -432,14 +387,12 @@
 ;; (place-image APPLE-IMG 32 32 MAIN)
 
 (define (img+scene posn img scene)
-  (place-image img 
+   (place-image img 
                (* (posn-x posn) path)
                (* (posn-y posn) path)
                scene))
+ 
 
-
-
-;; 
 ;;Опред, сталкивается ли змея с собой
 ;; > (self-colliding? (snake "up" (list (posn 1 1) (posn 2 1)
 ;;                                      (posn 2 2) (posn 1 2)
@@ -455,7 +408,7 @@
   (define x (posn-x (snake-head sn)))
   (define y (posn-y (snake-head sn)))
   (or (= 0 x) (= x SIZE)
-      (= 0 y) (= y SIZE)))
+      (= 2 y) (= y  SIZE)))
 
 ;;Одинаковы ли два положения?
 ;; > (posn=? (posn 1 1) (posn 1 1))
