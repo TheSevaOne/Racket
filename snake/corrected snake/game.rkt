@@ -52,8 +52,8 @@
 ;; Визуальная часть
 ;;ШРИФТ
 (define END 50)
-(define HELP-TEXT(text "Для смены режима нажмите 1 или 2. Пауза на 'p'. Выход 'q'." 15 "yellow"))
-(define MAIN (place-image/align HELP-TEXT  20 5 "left" "top"
+(define MESSAGE(text "Для смены режима нажмите 1 или 2. Пауза на 'p'. Выход 'q'." 15 "yellow"))
+(define MAIN (place-image/align MESSAGE  20 5 "left" "top"
 (place-image/align (rectangle 450 25 "solid" "blue") 0 0 "left" "top"
                                  (empty-scene WIDTH-PX HEIGHT-PX "black"))))
 
