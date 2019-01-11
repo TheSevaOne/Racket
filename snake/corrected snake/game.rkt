@@ -177,13 +177,9 @@
 
        
 (define (tofile  file  score)
-
-  (write-to-file  score file   #:exists  'update
+(write-to-file  score file   #:exists  'update
                   #:mode 'text))
 
-
-
-;; -----------------------------------------------------------------------------
 ;; ЕДА РОСТ
 
 ;;Может ли змея что то скушать 
