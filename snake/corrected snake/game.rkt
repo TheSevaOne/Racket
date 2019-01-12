@@ -38,16 +38,15 @@
 (define-values ( PAUSE?) #f)
 ;;Границы
 (define SIZE 30)
-
-(define path 15)
+(define PATH 15)
 
 ;; Константа времени  для яблок
 
 (define EXPIRATION-TIME 150)
 
 ;; Область
-(define WIDTH-PX  (* path 30))
-(define HEIGHT-PX (* path 30))
+(define WIDTH-PX  (* PATH 30))
+(define HEIGHT-PX (* PATH 30))
 
 ;; Визуальная часть
 ;;ШРИФТ
@@ -116,46 +115,38 @@
   (or (self-colliding? snake) (wall-colliding? snake)))
 
 ;; КОНЕЦ ИГРЫ
-(define (render-over)
+(define(render-over)
   (text "GAME OVER"  END  "RED"))
 
-(define (pause w )
-  (set! PAUSE? (not PAUSE? )) w )
+(define(pause w)
+  (set! PAUSE?(not PAUSE?))w)
 
 ;; Пауза и режимы ,Выход 
-(define (gamemode d w)
-  ( cond
+(define(gamemode d w)
+  (cond
      [(key=? d "1")
       (area (snake  "down" (list (posn  1 4)))
             (list (fresh-apple)
                   (fresh-apple)
                   (fresh-apple)
                   (fresh-apple)))]
-     [ (key=? d "2")
+     [(key=? d "2")
        (area (snake  "down" (list (posn  1 4)))
              (list (fresh-apple)))]
-     [(key=? d "p")
-          
-      (pause w) ]
-        
+     [(key=? d "p")(pause w)]
      [(key=? d "q") (exit)] 
-     [else w]
-     )
-  )
+     [else w]))
 
 (define (rendersnake w)
   (text (string-append 
          "Съел:" 
-         (number->string (length(drop-right(snake-segs (area-snake w))))))
-        END
-        "PURPLE"))
+         (number->string (length(drop-right(snake-segs (area-snake w)))))) END "PURPLE"))
 
 ;;Рендер геймовера
-(define (render-end w )
+(define (render-end w)
   (overlay (overlay/offset (render-over)
                            0 END
-                           (rendersnake w))
-           (render-area w)))
+                           (rendersnake w))(render-area w)))
 
 ; (define (tofile )
 ; 
@@ -177,8 +168,7 @@
 
        
 (define (tofile  file  score)
-(write-to-file  score file   #:exists  'update
-                  #:mode 'text))
+(write-to-file  score file   #:exists  'update #:mode 'text))
 
 ;; ЕДА РОСТ
 
@@ -199,7 +189,6 @@
 ;;(list (apple (posn 14 12) 150))
 (define (eat apples apple-to-eat)
   ;  (set! score (+ 1 score))
-   
   (cons (fresh-apple) (remove apple-to-eat apples)))
 
 ;; Проверка на яблоко
@@ -248,10 +237,8 @@
 ;; > (dropright '(1 2 3 4))
 ;; '(1 2 3)
 (define (drop-right segs)
-  (cond [(empty? (rest segs))
-         '()]
-        [else (cons (first segs) 
-                    (drop-right (rest segs)))]))
+  (cond [(empty? (rest segs))'()]
+        [else (cons (first segs)(drop-right (rest segs)))]))
 
 
 ;; 
@@ -270,10 +257,8 @@
 
 
 (define (exp g)
-  (cond [(empty? g)
-         '()]
-        [else (cons (countdown (first g))
-                    (exp (rest g)))]))
+  (cond [(empty? g)'()]
+        [else (cons (countdown (first g))(exp (rest g)))]))
 
 ;; срок годности 
 ;; > (done? (apple 1 2)
@@ -310,11 +295,8 @@
   (define the-snake (area-snake w))
   (cond [(and (opposite-dir? (snake-dir the-snake) d) 
               ;;  состоит из головы и хотя бы одного сегмента
-              (cons? (rest (snake-segs the-snake))))
-         (stop-with w)]
-        [else 
-         (area (snake-change-dir the-snake d) 
-               (area-apple  w))]))
+              (cons? (rest (snake-segs the-snake))))(stop-with w)]
+        [else  (area (snake-change-dir the-snake d)(area-apple  w))]))
 
 ;; 
 ;; 
@@ -322,39 +304,31 @@
 ;; > (opposite-dir? "up" "down")
 ;; #t
 (define (opposite-dir? d1 d2)
-  (cond [(string=? d1 "up")    (string=? d2 "down")]
-        [(string=? d1 "down")  (string=? d2 "up")]
-        [(string=? d1 "left")  (string=? d2 "right")]
-        [(string=? d1 "right") (string=? d2 "left")]))
+  (cond [(string=? d1 "up")(string=? d2 "down")]
+        [(string=? d1 "down")(string=? d2 "up")]
+        [(string=? d1 "left")(string=? d2 "right")]
+        [(string=? d1 "right")(string=? d2 "left")]))
  
 ;; РИСУЮ ЗМЕЮ от положения
 ;; > 
 (define (snake+scene snake scene)
   (define snake-body-scene
-    (img-list+scene  (snake-body snake) SEG-IMG scene))
+    (img-list+scene (snake-body snake) SEG-IMG scene))
   (define dir (snake-dir snake))
   (img+scene (snake-head snake) 
              (cond [(string=? "up" dir) HEAD-UP-IMG]
                    [(string=? "down" dir) HEAD-DOWN-IMG]
                    [(string=? "left" dir) HEAD-LEFT-IMG]
-                   [(string=? "right" dir) HEAD-RIGHT-IMG])
-             snake-body-scene))
-
-
-
-
+                   [(string=? "right" dir) HEAD-RIGHT-IMG])snake-body-scene))
 
 ;; рисую яблоки
 (define (apple-list+scene apple scene)
-
-  ;;ПОЗИЦИИ ЯБЛОК
+;;ПОЗИЦИИ ЯБЛОК
   ;; > (get-posns-from-apple (list (apple (posn 2 2) 1) (apple (posn 3 3) 1))
   ;; (list (posn 2 2) (posn 3 3))
   (define (get-posns-from-apple apple)
-    (cond [(empty? apple)
-           '()]
-          [else (cons (apple-loc (first apple))
-                      (get-posns-from-apple (rest apple)))]))
+    (cond [(empty? apple)'()]
+          [else (cons (apple-loc (first apple))(get-posns-from-apple (rest apple)))]))
   (img-list+scene (get-posns-from-apple apple) APPLE-IMG scene))
 ;;(posn-y(apple-loc(first(list (apple (posn 2 2) 1) (apple (posn 3 3) 1)))))
 ;; 
@@ -364,20 +338,16 @@
 ;;              (img-list+scene empty APPLE-IMG MAIN))
 (define (img-list+scene posns img scene)
   (cond[(empty? posns) scene]
-       [else (img+scene (first posns)
-                        img 
-                        (img-list+scene (rest posns) img scene))]))
+       [else (img+scene (first posns) img (img-list+scene (rest posns) img scene))]))
 
-;; 
-;; 
 ;;Рисует данное изображение на сцене .
 ;; > (img+scene (posn 2 2) APPLE-IMG MAIN)
 ;; (place-image APPLE-IMG 32 32 MAIN)
 
 (define (img+scene posn img scene)
   (place-image img 
-               (* (posn-x posn) path)
-               (* (posn-y posn) path)
+               (* (posn-x posn) PATH)
+               (* (posn-y posn) PATH)
                scene))
  
 
